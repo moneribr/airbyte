@@ -306,6 +306,8 @@ public class MongoUtils {
 
   private static List<String> getTypes(final MongoCollection<Document> collection, final String name) {
     final var fieldName = "$" + name;
+    // LOGGER.info("collection: {}", collection.getNamespace().getCollectionName());
+    // LOGGER.info("Field name: {}", fieldName);
     final AggregateIterable<Document> output = collection.aggregate(Arrays.asList(
         new Document("$limit", DISCOVER_LIMIT),
         new Document("$project", new Document(ID, 0).append("fieldType", new Document("$type", fieldName))),

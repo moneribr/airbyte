@@ -64,7 +64,7 @@ public class MongoUtil {
       final Document document = mongoClient.getDatabase(databaseName).runCommand(new Document("listCollections", 1)
           .append("authorizedCollections", true)
           .append("nameOnly", true))
-          .append("filter", "{ 'type': 'collection' }");
+          .append("filter", "{ 'type': 'collection' , 'name':{'$ne':'system.views'}}");
       return document.toBsonDocument()
           .get("cursor").asDocument()
           .getArray("firstBatch")

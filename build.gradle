@@ -61,7 +61,7 @@ if (!env.containsKey('VERSION')) {
 // For local development builds, the 'VERSION' environment variable is unset, and built images are tagged with 'dev'.
 ext {
     version = System.getenv("VERSION") ?: env.VERSION
-    image_tag = System.getenv("VERSION") ?: 'dev'
+    image_tag = System.getenv("VERSION") ?: '0.2.5'
 }
 
 def createLicenseWith = { File license, String startComment, String endComment, String lineComment, boolean isPython ->

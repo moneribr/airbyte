@@ -52,7 +52,7 @@ public class MongoDbSource extends AbstractDbSource<BsonType, MongoDatabase> {
 
   public static void main(final String[] args) throws Exception {
     final Source source = new MongoDbSource();
-    LOGGER.info("starting source: {}", MongoDbSource.class);
+    LOGGER.info("starting source agora: {}", MongoDbSource.class);
     new IntegrationRunner(source).run(args);
     LOGGER.info("completed source: {}", MongoDbSource.class);
   }
@@ -109,8 +109,14 @@ public class MongoDbSource extends AbstractDbSource<BsonType, MongoDatabase> {
 
     final Set<String> authorizedCollections = getAuthorizedCollections(database);
     authorizedCollections.parallelStream().forEach(collectionName -> {
+       if ("system.views".equals(collectionName)) {
+        // Se collectionName for igual a "system.views", pule a iteração
+        return;
+      }
+      LOGGER.info("Parsing collection: {}", collectionName);
       final MongoCollection<Document> collection = database.getCollection(collectionName);
       final List<CommonField<BsonType>> fields = MongoUtils.getUniqueFields(collection).stream().map(MongoUtils::nodeToCommonField).toList();
+      LOGGER.info("Finishin Parsing collection: {}", collectionName);
 
       // The field name _id is reserved for use as a primary key;
       final TableInfo<CommonField<BsonType>> tableInfo = TableInfo.<CommonField<BsonType>>builder()
@@ -134,10 +140,11 @@ public class MongoDbSource extends AbstractDbSource<BsonType, MongoDatabase> {
      * database.
      */
     try {
+      LOGGER.info("getAuthorizedCollections");
       final Document document = database.getDatabase().runCommand(new Document("listCollections", 1)
           .append("authorizedCollections", true)
           .append("nameOnly", true))
-          .append("filter", "{ 'type': 'collection' }");
+          .append("filter", "{ 'type': 'collection' , 'name':{'$ne':'system.views'}}");
       return document.toBsonDocument()
           .get("cursor").asDocument()
           .getArray("firstBatch")
